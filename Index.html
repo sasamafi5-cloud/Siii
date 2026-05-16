@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#050d1a">
+<title>Sii - AI Sekretarica</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--teal:#00e5d4;--cyan:#00cfff;--deep:#030b17;--glass:rgba(0,180,220,.07);--gb:rgba(0,220,255,.2);--txt:#e8f8ff;--txt2:rgba(180,230,255,.7);--dim:rgba(120,180,210,.5);--gi:1;--bi:1;--ha:1;--fs:3s}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;min-height:100%;overflow-x:hidden;background:var(--deep);font-family:'Exo 2',sans-serif;color:var(--txt)}
+.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(80px);animation:orbF var(--fs) ease-in-out infinite alternate}
+.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(0,200,220,.12) 0,transparent 70%);top:-150px;left:-100px}
+.o2{width:500px;height:500px;background:radial-gradient(circle,rgba(0,100,255,.1) 0,transparent 70%);bottom:-100px;right:-100px;animation-delay:-1.5s}
+@keyframes orbF{0%{transform:translate(0,0)}100%{transform:translate(30px,20px)}}
+.app{position:relative;z-index:1;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;position:sticky;top:0;z-index:100;background:rgba(3,11,23,.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,200,255,.15)}
+.av{width:40px;height:40px;border-radius:50%;border:2px solid var(--teal);box-shadow:0 0 14px rgba(0,229,212,.5);overflow:hidden;flex-shrink:0}
+.av img{width:100%;height:100%;object-fit:cover}
+.hi h1{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--teal);letter-spacing:1px}
+.hi p{font-size:10px;color:var(--txt2);font-family:'Rajdhani',sans-serif;letter-spacing:2px}
+.hl{display:flex;align-items:center;gap:9px}
+.hr{display:flex;align-items:center;gap:7px}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}}
+.pbadge{font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:600;color:var(--teal);background:rgba(0,80,100,.3);border:1px solid rgba(0,229,212,.3);padding:3px 9px;border-radius:20px;cursor:pointer}
+/* TABS */
+.tabs{display:flex;margin:10px 14px;background:rgba(6,16,28,.7);border:1px solid rgba(0,150,200,.2);border-radius:13px;overflow:hidden}
+.tab{flex:1;padding:10px 3px;border:none;background:transparent;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:.3px;color:var(--dim);cursor:pointer;transition:all .3s;text-transform:uppercase}
+.tab.on{color:var(--teal);background:rgba(0,200,220,.1);box-shadow:inset 0 -2px 0 var(--teal)}
+.sec{display:none;padding:0 0 100px;animation:fi .3s ease}
+.sec.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* MIC */
+.mica{display:flex;flex-direction:column;align-items:center;padding:18px 14px 0}
+.micw{position:relative;width:190px;height:210px;display:flex;align-items:center;justify-content:center;cursor:pointer;animation:mf var(--fs) ease-in-out infinite alternate}
+@keyframes mf{0%{transform:translateY(0)}100%{transform:translateY(calc(-10px * var(--ha)))}}
+.msh{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);width:100px;height:16px;background:radial-gradient(ellipse,rgba(0,229,212,.4) 0,transparent 70%);filter:blur(8px);animation:sf var(--fs) ease-in-out infinite alternate}
+@keyframes sf{0%{opacity:.8;transform:translateX(-50%) scaleX(1)}100%{opacity:.4;transform:translateX(-50%) scaleX(.7)}}
+#wc{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:180px;pointer-events:none}
+.m3{position:relative;z-index:5;width:130px;height:195px;display:flex;flex-direction:column;align-items:center}
+.mh{width:86px;height:105px;border-radius:43px 43px 26px 26px;position:relative;overflow:hidden;box-shadow:0 0 0 3px rgba(0,229,212,.3),0 0 28px rgba(0,229,212,calc(.5 * var(--gi))),0 0 56px rgba(0,100,255,calc(.3 * var(--bi))),inset 0 2px 5px rgba(255,255,255,.3),inset 0 -3px 8px rgba(0,0,0,.6),0 18px 36px rgba(0,0,0,.8);transition:all .4s;flex-shrink:0}
+.mhi{width:100%;height:100%;background:linear-gradient(135deg,#2a3a4a,#1a2a3a,#0d1d2d,#152535);border-radius:inherit;position:relative;overflow:hidden}
+.mmesh{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(0,200,255,.07) 4px,rgba(0,200,255,.07) 5px),repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(0,200,255,.07) 4px,rgba(0,200,255,.07) 5px);border-radius:inherit}
+.mhl{position:absolute;top:8px;left:11px;width:28px;height:46px;background:linear-gradient(145deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,.04) 50%,transparent 100%);border-radius:16px;transform:rotate(-15deg)}
+.mring{position:absolute;inset:-3px;border-radius:46px 46px 29px 29px;border:1px solid rgba(0,229,212,.4);pointer-events:none}
+#mimg{position:absolute;inset:0;border-radius:inherit;object-fit:cover;opacity:0;transition:opacity .5s;mix-blend-mode:overlay}
+#mimg.on{opacity:.85}
+.mn{width:14px;height:34px;background:linear-gradient(to right,#1a2a3a,#2a4050,#1a2a3a);border-radius:4px;box-shadow:0 3px 10px rgba(0,0,0,.6)}
+.mb{width:60px;height:13px;background:linear-gradient(to bottom,#1e3040,#0f1e2e);border-radius:30px 30px 9px 9px;box-shadow:0 5px 18px rgba(0,0,0,.7),0 0 18px rgba(0,150,200,.2)}
+.ms{width:50px;height:9px;background:linear-gradient(to bottom,#1a2a3a,#0d1a25);border-radius:25px}
+.micw.active .mh{box-shadow:0 0 0 3px rgba(0,229,212,.7),0 0 48px rgba(0,229,212,calc(.9 * var(--gi))),0 0 96px rgba(0,100,255,calc(.6 * var(--bi))),inset 0 2px 5px rgba(255,255,255,.4),inset 0 -3px 8px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.8)}
+.ttl{font-family:'Orbitron',sans-serif;font-size:30px;font-weight:800;color:var(--teal);text-shadow:0 0 18px rgba(0,229,212,calc(.8 * var(--gi))),0 0 36px rgba(0,229,212,calc(.4 * var(--bi)));letter-spacing:2px;margin:12px 0 2px;text-align:center}
+.sub{font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:3px;color:var(--txt2);text-transform:uppercase;margin-bottom:12px}
+/* CHAT */
+.cbb{margin:0 14px 10px;padding:13px 15px;background:rgba(0,40,70,.65);border:1px solid rgba(0,200,255,.2);border-radius:15px 15px 15px 4px;backdrop-filter:blur(16px);box-shadow:0 8px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);min-height:48px;position:relative;overflow:hidden}
+.cbb::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,212,.5),transparent)}
+.ct{font-size:14px;line-height:1.6;color:var(--txt)}
+.dots{display:inline-flex;gap:3px;align-items:center}
+.dots span{width:5px;height:5px;border-radius:50%;background:var(--teal);animation:dt 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes dt{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+/* BTN */
+.r2{display:flex;gap:8px;padding:0 14px;margin-bottom:8px}
+.btn{flex:1;height:44px;border-radius:12px;border:none;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:1px;cursor:pointer;position:relative;overflow:hidden;transition:all .2s cubic-bezier(.34,1.56,.64,1);text-transform:uppercase}
+.btn:active{transform:translateY(3px) scale(.97)!important}
+.bsec{background:linear-gradient(145deg,#1a2d40,#0f1e2e);color:var(--txt2);box-shadow:0 6px 20px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.1);border:1px solid rgba(0,150,200,.2)}
+.bsec:hover{transform:translateY(-2px);color:var(--txt)}
+.bpri{background:linear-gradient(145deg,#1a5fff,#0040cc);color:#fff;font-weight:700;box-shadow:0 6px 20px rgba(0,80,255,.5),inset 0 1px 0 rgba(255,255,255,.28);border:1px solid rgba(100,150,255,.4)}
+.bpri:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,80,255,.6)}
+.bteal{background:linear-gradient(145deg,#00b89a,#007a6a);color:#fff;font-weight:700;box-shadow:0 6px 20px rgba(0,180,150,.5),inset 0 1px 0 rgba(255,255,255,.28);border:1px solid rgba(0,229,212,.4)}
+.bteal:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,180,150,.6)}
+.bwarn{background:linear-gradient(145deg,#cc7700,#995500);color:#fff;box-shadow:0 6px 20px rgba(200,120,0,.4),inset 0 1px 0 rgba(255,255,255,.2);border:1px solid rgba(255,150,0,.3)}
+.bdng{background:linear-gradient(145deg,#cc2200,#991a00);color:#fff;box-shadow:0 6px 20px rgba(200,40,0,.4),inset 0 1px 0 rgba(255,255,255,.2);border:1px solid rgba(255,80,0,.3)}
+/* CARD */
+.card{background:rgba(6,18,34,.75);border:1px solid rgba(0,180,220,.18);border-radius:15px;padding:13px;backdrop-filter:blur(20px);box-shadow:0 14px 36px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);position:relative;overflow:hidden;margin-bottom:9px}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,.4),transparent)}
+.ch{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);margin-bottom:9px;display:flex;align-items:center;justify-content:space-between}
+.chl{display:flex;align-items:center;gap:5px}
+.chl::before{content:'';display:block;width:3px;height:12px;background:var(--teal);border-radius:2px;box-shadow:0 0 6px var(--teal)}
+.addbtn{width:24px;height:24px;border-radius:7px;border:1px solid rgba(0,229,212,.4);background:rgba(0,100,120,.3);color:var(--teal);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.addbtn:hover{background:rgba(0,150,180,.3);transform:scale(1.1)}
+.ir{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid rgba(0,150,200,.1);font-size:13px;color:var(--txt2)}
+.ir:last-child{border-bottom:none;padding-bottom:0}
+.ii{font-size:14px;flex-shrink:0}
+.it{flex:1;line-height:1.3}
+.itm{font-family:'Orbitron',sans-serif;font-size:8px;color:var(--cyan);background:rgba(0,150,200,.1);padding:2px 7px;border-radius:10px;border:1px solid rgba(0,200,255,.2);white-space:nowrap}
+.delbtn{width:20px;height:20px;border-radius:5px;border:none;background:rgba(255,50,0,.15);color:rgba(255,100,80,.8);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.delbtn:hover{background:rgba(255,50,0,.35);color:#fff}
+.est{text-align:center;padding:16px;color:var(--dim);font-size:12px;font-family:'Rajdhani',sans-serif}
+.est div{font-size:24px;margin-bottom:6px}
+/* TOGGLE */
+.tr{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;background:var(--glass);border:1px solid var(--gb);border-radius:12px;backdrop-filter:blur(16px)}
+.tl{font-size:12px;color:var(--txt2);font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+.sw{position:relative;width:48px;height:25px;background:linear-gradient(145deg,#0a1520,#0f1e2e);border-radius:12px;cursor:pointer;border:1px solid rgba(0,150,200,.25);box-shadow:inset 0 2px 7px rgba(0,0,0,.5);transition:all .3s;flex-shrink:0}
+.sw.on{background:linear-gradient(145deg,#006688,#004466);border-color:rgba(0,229,212,.5);box-shadow:inset 0 2px 7px rgba(0,0,0,.3),0 0 12px rgba(0,229,212,.3)}
+.sth{position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:linear-gradient(145deg,#2a4050,#1a2d3d);box-shadow:0 2px 7px rgba(0,0,0,.5);transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.sw.on .sth{transform:translateX(21px);background:linear-gradient(145deg,#00e5d4,#00b8aa);box-shadow:0 2px 7px rgba(0,0,0,.4),0 0 10px rgba(0,229,212,.6)}
+/* MODAL */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);z-index:999;display:flex;align-items:center;justify-content:center;padding:18px;animation:fi .2s ease}
+.mdl{background:linear-gradient(145deg,#0a1828,#071020);border:1px solid rgba(0,200,255,.3);border-radius:18px;padding:22px;width:100%;max-width:380px;box-shadow:0 40px 80px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.07);position:relative}
+.mdl::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,212,.6),transparent);border-radius:18px 18px 0 0}
+.mdl h3{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--teal);margin-bottom:16px;letter-spacing:1px}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:10px;font-family:'Rajdhani',sans-serif;letter-spacing:1.5px;color:var(--txt2);margin-bottom:5px;text-transform:uppercase}
+.fld input,.fld select,.fld textarea{width:100%;background:rgba(0,20,40,.7);border:1px solid rgba(0,150,200,.3);border-radius:9px;padding:9px 12px;color:var(--txt);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;transition:border-color .3s;box-shadow:inset 0 2px 5px rgba(0,0,0,.4)}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:rgba(0,229,212,.5)}
+.fld select option{background:#0a1828}
+.fld textarea{resize:none;height:65px;line-height:1.5}
+.mbtns{display:flex;gap:9px;margin-top:16px}
+.mbtns .btn{height:42px;font-size:11px}
+/* ALARM NOTIF */
+.anotif{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:9999;pointer-events:none}
+.ani{background:linear-gradient(135deg,#1a0000,#2a0800);border:2px solid rgba(255,80,0,.6);border-radius:0 0 18px 18px;padding:14px 18px;box-shadow:0 8px 40px rgba(255,50,0,.5);animation:aslide .4s ease,aglw 1s ease-in-out infinite alternate;pointer-events:all}
+@keyframes aslide{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+@keyframes aglw{0%{box-shadow:0 8px 40px rgba(255,50,0,.5)}100%{box-shadow:0 8px 60px rgba(255,100,0,.8),0 0 80px rgba(255,80,0,.4)}}
+.atop{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.aico{font-size:26px;animation:aring .4s ease-in-out infinite alternate}
+@keyframes aring{0%{transform:rotate(-12deg)}100%{transform:rotate(12deg)}}
+.atit{font-family:'Orbitron',sans-serif;font-size:12px;color:#ffaa00;letter-spacing:1px}
+.atm{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;color:#fff}
+.amsg{font-size:14px;color:rgba(255,220,180,.9);margin-bottom:10px;line-height:1.4}
+.abtns{display:flex;gap:7px}
+.abtn{flex:1;padding:9px;border-radius:9px;border:none;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px}
+.adis{background:rgba(255,80,0,.3);color:#ffaa00;border:1px solid rgba(255,80,0,.4)}
+.asnz{background:rgba(100,100,100,.3);color:#aaa;border:1px solid rgba(200,200,200,.2)}
+/* SLBL */
+.slbl{font-family:'Orbitron',sans-serif;font-size:8px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin:12px 14px 7px;display:flex;align-items:center;gap:7px}
+.slbl::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(0,150,200,.2),transparent)}
+/* INPUT BAR */
+.ibar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:9px 13px 17px;background:rgba(3,11,23,.95);backdrop-filter:blur(24px);border-top:1px solid rgba(0,150,200,.2);z-index:100;box-shadow:0 -8px 30px rgba(0,0,0,.5)}
+.iw{display:flex;gap:7px;align-items:center}
+.cinp{flex:1;height:42px;border-radius:21px;border:none;background:linear-gradient(145deg,#0a1828,#071020);border:1px solid rgba(0,150,220,.25);color:var(--txt);padding:0 15px;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;box-shadow:inset 0 2px 7px rgba(0,0,0,.4);transition:all .3s}
+.cinp::placeholder{color:var(--dim)}
+.cinp:focus{border-color:rgba(0,229,212,.4);box-shadow:inset 0 2px 7px rgba(0,0,0,.4),0 0 12px rgba(0,229,212,.12)}
+.sndb{width:42px;height:42px;border-radius:50%;border:none;background:linear-gradient(145deg,#00b89a,#007a6a);color:#fff;font-size:17px;cursor:pointer;box-shadow:0 4px 14px rgba(0,180,150,.4),inset 0 1px 0 rgba(255,255,255,.28);transition:all .3s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sndb:hover{transform:scale(1.1);box-shadow:0 6px 18px rgba(0,180,150,.6)}
+.sndb:active{transform:scale(.95)}
+.micib{width:42px;height:42px;border-radius:50%;border:1px solid rgba(0,229,212,.3);background:rgba(0,50,80,.4);color:var(--teal);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0}
+.micib:hover{background:rgba(0,100,140,.4)}
+.micib.rec{background:rgba(255,0,0,.2);border-color:rgba(255,0,0,.5);color:#ff4444;animation:rp 1s infinite}
+@keyframes rp{0%,100%{box-shadow:none}50%{box-shadow:0 0 14px rgba(255,0,0,.6)}}
+/* SLIDERS */
+.slg{background:var(--glass);border:1px solid var(--gb);border-radius:13px;padding:13px;margin-bottom:10px;backdrop-filter:blur(16px)}
+.sgt{font-family:'Orbitron',sans-serif;font-size:8px;font-weight:600;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.sgt::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(0,200,255,.3),transparent)}
+.sli{margin-bottom:9px}.sli:last-child{margin-bottom:0}
+.sll{display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px;color:var(--txt2);font-family:'Rajdhani',sans-serif}
+.slv{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--teal)}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:linear-gradient(145deg,#00e5d4,#00a898);box-shadow:0 2px 7px rgba(0,0,0,.4),0 0 9px rgba(0,229,212,.5);cursor:pointer;border:2px solid rgba(0,229,212,.3);transition:transform .2s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+/* MODES */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.mdb{padding:9px 3px;border-radius:10px;border:1px solid rgba(0,120,160,.2);background:linear-gradient(145deg,#0f1e2e,#0a1520);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;color:var(--dim);text-align:center;transition:all .3s}
+.mdb.on{color:var(--teal);border-color:rgba(0,229,212,.4);background:rgba(0,80,100,.3)}
+.mdi{font-size:17px;display:block;margin-bottom:2px}
+/* SKINS */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.skb{aspect-ratio:1;border-radius:12px;border:2px solid transparent;cursor:pointer;transition:all .3s;box-shadow:0 3px 10px rgba(0,0,0,.4)}
+.skb.on{border-color:var(--teal);box-shadow:0 0 14px rgba(0,229,212,.5)}
+.upz{border:2px dashed rgba(0,200,220,.3);border-radius:13px;padding:18px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(0,30,50,.3)}
+.upz:hover,.upz.dov{border-color:var(--teal);background:rgba(0,80,100,.2)}
+.crow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:11px}
+.csw{width:28px;height:28px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.csw.on{border-color:#fff;transform:scale(1.1)}
+.mgr{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mat{padding:8px 3px;border-radius:9px;border:1px solid rgba(0,150,200,.2);background:linear-gradient(145deg,#0f1e2e,#0a1520);cursor:pointer;font-size:10px;font-family:'Rajdhani',sans-serif;font-weight:600;color:var(--dim);text-align:center;transition:all .3s}
+.mat.on{color:var(--teal);border-color:rgba(0,229,212,.4);background:rgba(0,80,100,.3)}
+.p14{padding:0 14px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,200,220,.3);border-radius:2px}
+.tgsec{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.badge-count{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#ff3322,#cc2200);border-radius:50%;width:18px;height:18px;font-size:9px;font-weight:700;color:#fff;box-shadow:0 3px 8px rgba(255,50,0,.5),inset 0 1px 0 rgba(255,255,255,.25);margin-left:4px}
+</style>
+</head>
+<body>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="app" id="app">
+
+<header class="hdr">
+  <div class="hl">
+    <div class="av"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Ccircle cx='22' cy='22' r='22' fill='%230a2040'/%3E%3Ccircle cx='22' cy='18' r='8' fill='%2300c8b8'/%3E%3Cellipse cx='22' cy='36' rx='12' ry='8' fill='%2300a898'/%3E%3C/svg%3E" alt="Sii"></div>
+    <div class="hi"><h1>SII</h1><p>AI SEKRETARICA</p></div>
+  </div>
+  <div class="hr">
+    <div class="sdot" id="sdot"></div>
+    <span class="pbadge" id="pbadge" onclick="gotoAI()">😊 Prijateljski</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab on" onclick="stab('home',this)">🏠 Početna</button>
+  <button class="tab" onclick="stab('data',this)" id="dtab">📋 Podaci</button>
+  <button class="tab" onclick="stab('stil',this)">🎨 Stil</button>
+  <button class="tab" onclick="stab('ai',this)" id="aitab">🤖 AI</button>
+</div>
+
+<!-- HOME -->
+<div class="sec on" id="s-home">
+  <div class="mica">
+    <div class="micw" id="micw" onclick="togListen()">
+      <canvas id="wc"></canvas>
+      <div class="msh"></div>
+      <div class="m3">
+        <div class="mh" id="mhd">
+          <div class="mhi" id="mhi"><div class="mmesh"></div><div class="mhl"></div><img id="mimg" alt=""></div>
+          <div class="mring"></div>
+        </div>
+        <div class="mn"></div><div class="mb"></div><div class="ms"></div>
+      </div>
+    </div>
+    <div class="ttl" id="ttl">Sii Sluša</div>
+    <div class="sub" id="sub">Pritisni da razgovaramo</div>
+  </div>
+
+  <div class="cbb"><div class="ct" id="ct"><span class="dots"><span></span><span></span><span></span></span></div></div>
+
+  <div class="r2">
+    <button class="btn bsec" onclick="showToday()">📅 Pregled dana</button>
+    <button class="btn bpri" id="lbtn" onclick="togListen()">▶ AKTIVIRAJ</button>
+  </div>
+  <div class="r2" style="margin-bottom:10px">
+    <button class="btn bteal" onclick="om('termin')">+ Termin</button>
+    <button class="btn bwarn" onclick="om('alarm')">⏰ Alarm</button>
+    <button class="btn bsec" onclick="om('belezka')">📝 Beleška</button>
+  </div>
+
+  <div class="slbl">Termini danas</div>
+  <div class="p14">
+    <div class="card">
+      <div class="ch"><div class="chl">Termini <span id="tcnt"></span></div><button class="addbtn" onclick="om('termin')">+</button></div>
+      <div id="tlistH"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="chl">Alarmi <span id="acnt"></span></div><button class="addbtn" onclick="om('alarm')">+</button></div>
+      <div id="alistH"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="chl">Beleške <span id="bcnt"></span></div><button class="addbtn" onclick="om('belezka')">+</button></div>
+      <div id="blistH"></div>
+    </div>
+    <div style="background:linear-gradient(135deg,rgba(0,40,80,.6),rgba(0,20,50,.7));border:1px solid rgba(0,150,200,.2);border-radius:14px;padding:14px;display:flex;gap:12px;align-items:center;margin-bottom:10px">
+      <div style="font-size:34px">⛅</div>
+      <div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:28px;font-weight:700;color:var(--teal)">18°C</div>
+        <div style="font-size:11px;color:var(--txt2);font-family:'Rajdhani',sans-serif">Delimično oblačno · Beograd</div>
+        <div style="font-size:10px;color:var(--dim);margin-top:3px">Max 22° · Min 14°</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DATA -->
+<div class="sec" id="s-data">
+  <div class="p14">
+    <div class="slbl" style="margin-left:0">Termini</div>
+    <div class="card">
+      <div class="ch"><div class="chl">Svi termini</div><button class="addbtn" onclick="om('termin')">+</button></div>
+      <div id="tlistF"></div>
+    </div>
+    <div class="slbl" style="margin-left:0">Alarmi</div>
+    <div class="card">
+      <div class="ch"><div class="chl">Svi alarmi</div><button class="addbtn" onclick="om('alarm')">+</button></div>
+      <div id="alistF"></div>
+    </div>
+    <div class="slbl" style="margin-left:0">Beleške</div>
+    <div class="card">
+      <div class="ch"><div class="chl">Sve beleške</div><button class="addbtn" onclick="om('belezka')">+</button></div>
+      <div id="blistF"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STIL -->
+<div class="sec" id="s-stil">
+  <div class="p14">
+    <div class="slbl" style="margin-left:0">Skinovi</div>
+    <div class="sgrid">
+      <div class="skb on" style="background:linear-gradient(135deg,#1a2d40,#0d1e2d)" onclick="applySkin('default',this)"></div>
+      <div class="skb" style="background:linear-gradient(135deg,#1a0d2d,#0d0818);border:1px solid rgba(150,0,255,.3)" onclick="applySkin('purple',this)"></div>
+      <div class="skb" style="background:linear-gradient(135deg,#002820,#001810);border:1px solid rgba(0,255,150,.3)" onclick="applySkin('green',this)"></div>
+      <div class="skb" style="background:linear-gradient(135deg,#2d1a00,#1e1000);border:1px solid rgba(255,150,0,.3)" onclick="applySkin('gold',this)"></div>
+      <div class="skb" style="background:linear-gradient(135deg,#1a0000,#0d0000);border:1px solid rgba(255,0,0,.3)" onclick="applySkin('red',this)"></div>
+      <div class="skb" style="background:linear-gradient(135deg,#e0e8f0,#b0bcc8)" onclick="applySkin('chrome',this)"></div>
+      <div class="skb" style="background:linear-gradient(135deg,#000a20,#001030);border:1px solid rgba(0,200,255,.4)" onclick="applySkin('holo',this)"></div>
+      <div class="skb" style="background:#0d0d0d" onclick="applySkin('obsidian',this)"></div>
+    </div>
+    <div class="slbl" style="margin-left:0">Vlastita slika</div>
+    <div class="upz" id="upz" onclick="document.getElementById('iup').click()" ondragover="dvr(event)" ondrop="ddr(event)">
+      <div style="font-size:26px;margin-bottom:5px">📸</div>
+      <div style="font-size:12px;color:var(--txt2)">Prevuci ili klikni · PNG/JPG/WebP</div>
+    </div>
+    <input type="file" id="iup" accept="image/*" style="display:none" onchange="hiup(event)">
+    <div class="slbl" style="margin-left:0">Glow boja</div>
+    <div class="crow">
+      <div class="csw on" style="background:#00e5d4" onclick="setG('#00e5d4',this)"></div>
+      <div class="csw" style="background:#1a6fff" onclick="setG('#1a6fff',this)"></div>
+      <div class="csw" style="background:#aa44ff" onclick="setG('#aa44ff',this)"></div>
+      <div class="csw" style="background:#ff4444" onclick="setG('#ff4444',this)"></div>
+      <div class="csw" style="background:#ff8800" onclick="setG('#ff8800',this)"></div>
+      <div class="csw" style="background:#44ff88" onclick="setG('#44ff88',this)"></div>
+      <div class="csw" style="background:#ffffff" onclick="setG('#ffffff',this)"></div>
+      <input type="color" value="#00e5d4" style="width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;padding:2px;background:none" onchange="setG(this.value,null)">
+    </div>
+    <div class="slbl" style="margin-left:0">Materijal</div>
+    <div class="mgr" style="margin-bottom:12px">
+      <button class="mat on" onclick="setM('metal',this)">⚙️ Metal</button>
+      <button class="mat" onclick="setM('glass',this)">🔮 Staklo</button>
+      <button class="mat" onclick="setM('plastic',this)">💎 Plastika</button>
+      <button class="mat" onclick="setM('holo',this)">🌈 Holo</button>
+      <button class="mat" onclick="setM('rubber',this)">⚫ Guma</button>
+      <button class="mat" onclick="setM('chrome',this)">✨ Hrom</button>
+    </div>
+    <div class="slbl" style="margin-left:0">3D Kontrole</div>
+    <div class="slg">
+      <div class="sgt">Svetlo</div>
+      <div class="sli"><div class="sll"><span>Glow</span><span class="slv" id="vgi">50</span></div><input type="range" min="0" max="100" value="50" oninput="upv('--gi',this,0,2,'vgi')"></div>
+      <div class="sli"><div class="sll"><span>Bloom</span><span class="slv" id="vbi">50</span></div><input type="range" min="0" max="100" value="50" oninput="upv('--bi',this,0,2,'vbi')"></div>
+    </div>
+    <div class="slg">
+      <div class="sgt">Animacije</div>
+      <div class="sli"><div class="sll"><span>Lebdenje</span><span class="slv" id="vha">50</span></div><input type="range" min="0" max="100" value="50" oninput="upv('--ha',this,0,2,'vha')"></div>
+      <div class="sli"><div class="sll"><span>Brzina</span><span class="slv" id="vfs">3</span>s</div><input type="range" min="1" max="8" value="3" oninput="upfs(this)"></div>
+      <div class="sli"><div class="sll"><span>Veličina</span><span class="slv" id="vms">100%</span></div><input type="range" min="60" max="150" value="100" oninput="upms(this)"></div>
+    </div>
+    <button class="btn bdng" style="width:100%;height:40px;margin-bottom:14px" onclick="rstyle()">🔄 Resetuj stil</button>
+  </div>
+</div>
+
+<!-- AI -->
+<div class="sec" id="s-ai">
+  <div class="p14">
+    <div class="slbl" style="margin-left:0">AI Ličnost</div>
+    <div class="mgrid">
+      <button class="mdb" onclick="setMode('professional',this)"><span class="mdi">💼</span>Profesionalni</button>
+      <button class="mdb on" onclick="setMode('friendly',this)"><span class="mdi">😊</span>Prijateljski</button>
+      <button class="mdb" onclick="setMode('funny',this)"><span class="mdi">😄</span>Šaljivi</button>
+      <button class="mdb" onclick="setMode('motivational',this)"><span class="mdi">🚀</span>Motivacioni</button>
+      <button class="mdb" onclick="setMode('futuristic',this)"><span class="mdi">🤖</span>AI Futurista</button>
+      <button class="mdb" onclick="setMode('calm',this)"><span class="mdi">🧘</span>Smiren</button>
+    </div>
+    <div class="slbl" style="margin-left:0">Glas</div>
+    <div class="card" style="margin-bottom:10px">
+      <div class="sli"><div class="sll"><span>Brzina govora</span><span class="slv" id="vss">75%</span></div><input type="range" min="30" max="120" value="75" oninput="document.getElementById('vss').textContent=this.value+'%'"></div>
+      <div class="sli"><div class="sll"><span>Toplina</span><span class="slv" id="vwm">60%</span></div><input type="range" min="0" max="100" value="60" oninput="document.getElementById('vwm').textContent=this.value+'%'"></div>
+    </div>
+    <div class="slbl" style="margin-left:0">API Ključ (opciono)</div>
+    <div class="card" style="margin-bottom:10px">
+      <div style="font-size:11px;color:var(--txt2);margin-bottom:8px;line-height:1.6;font-family:Rajdhani,sans-serif">Bez ključa: lokalni mod ✅ · Sa ključem: puni AI 🤖</div>
+      <div style="display:flex;gap:7px;align-items:center;margin-bottom:8px">
+        <input type="password" id="apiKeyInp" placeholder="sk-ant-api03-..." style="flex:1;background:rgba(0,20,40,.7);border:1px solid rgba(0,150,200,.3);border-radius:9px;padding:9px 12px;color:#e8f8ff;font-size:12px;outline:none">
+        <button onclick="saveKey()" style="height:38px;padding:0 12px;border-radius:9px;border:1px solid rgba(0,229,212,.4);background:linear-gradient(145deg,#00b89a,#007a6a);color:#fff;font-weight:700;font-size:11px;cursor:pointer">💾</button>
+      </div>
+      <div id="apiStatus" style="font-size:11px;padding:5px 10px;border-radius:7px;text-align:center"></div>
+      <button onclick="clearKey()" style="width:100%;margin-top:7px;height:32px;border-radius:8px;border:1px solid rgba(255,80,0,.3);background:rgba(200,40,0,.15);color:#ff6655;font-size:10px;cursor:pointer">🗑 Obriši ključ</button>
+    </div>
+    <div class="slbl" style="margin-left:0">Opcije</div>
+    <div class="tgsec">
+      <div class="tr"><span class="tl">🔊 Glasovna aktivacija</span><div class="sw on" id="togV" onclick="tsw('togV')"><div class="sth"></div></div></div>
+      <div class="tr"><span class="tl">🔔 Zvučni alarmi</span><div class="sw on" id="togS" onclick="tsw('togS');testSound()"><div class="sth"></div></div></div>
+      <div class="tr"><span class="tl">📳 Vibracija</span><div class="sw on" id="togVb" onclick="tsw('togVb')"><div class="sth"></div></div></div>
+      <div class="tr"><span class="tl">🔒 Privatni mod</span><div class="sw" id="togP" onclick="tsw('togP')"><div class="sth"></div></div></div>
+    </div>
+    <div class="slbl" style="margin-left:0">Istorija razgovora</div>
+    <div class="card" style="max-height:200px;overflow-y:auto;margin-bottom:8px" id="chist">
+      <div class="est"><div>💬</div>Nema istorije</div>
+    </div>
+    <button class="btn bdng" style="width:100%;height:40px;margin-bottom:14px" onclick="clearC()">🗑 Obriši razgovore</button>
+  </div>
+</div>
+
+</div><!-- app -->
+
+<!-- INPUT BAR -->
+<div class="ibar">
+  <div class="iw">
+    <button class="micib" id="micib" onclick="togVoice()">🎤</button>
+    <input class="cinp" id="cinp" placeholder="Pitaj Sii... Dodaj termin, alarm, belešku..." onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="sndb" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="mov" id="mov" style="display:none" onclick="if(event.target===this)cm()">
+  <div class="mdl">
+    <h3 id="mtit">Dodaj</h3>
+    <div id="mbody"></div>
+    <div class="mbtns">
+      <button class="btn bsec" style="flex:1" onclick="cm()">Otkaži</button>
+      <button class="btn bteal" style="flex:1" onclick="saveM()">💾 Sačuvaj</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALARM NOTIF -->
+<div class="anotif" id="anotif" style="display:none">
+  <div class="ani">
+    <div class="atop">
+      <span class="aico">🔔</span>
+      <div><div class="atit">ALARM</div><div class="atm" id="atm">07:00</div></div>
+    </div>
+    <div class="amsg" id="amsg">Alarm!</div>
+    <div class="abtns">
+      <button class="abtn adis" onclick="disAlarm()">✓ Ugasi</button>
+      <button class="abtn asnz" onclick="snzAlarm()">💤 +10 min</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const DB={
+  termini:JSON.parse(localStorage.getItem('sii-t')||'[]'),
+  alarmi:JSON.parse(localStorage.getItem('sii-a')||'[]'),
+  belezke:JSON.parse(localStorage.getItem('sii-b')||'[]'),
+  msgs:[],mode:'friendly',gc:'#00e5d4',skin:'default',mat:'metal'
+};
+function sv(){localStorage.setItem('sii-t',JSON.stringify(DB.termini));localStorage.setItem('sii-a',JSON.stringify(DB.alarmi));localStorage.setItem('sii-b',JSON.stringify(DB.belezke))}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,5)}
+
+// ===== RENDER =====
+function ra(){rt();raa();rb()}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function rt(){
+  const l=DB.termini.sort((a,b)=>(a.vreme||'').localeCompare(b.vreme||''));
+  const h=l.length?l.map(x=>irow(x,'termin')).join(''):est('📅','Nema termina. Klikni + da dodaš!');
+  document.getElementById('tlistH').innerHTML=h;
+  document.getElementById('tlistF').innerHTML=h;
+  const cnt=document.getElementById('tcnt');
+  if(l.length){cnt.innerHTML=`<span class="badge-count">${l.length}</span>`;cnt.style.display='inline';}
+  else{cnt.innerHTML='';cnt.style.display='none';}
+}
+function raa(){
+  const l=DB.alarmi.sort((a,b)=>(a.vreme||'').localeCompare(b.vreme||''));
+  const h=l.length?l.map(x=>irow(x,'alarm')).join(''):est('⏰','Nema alarma. Klikni + da podesiš!');
+  document.getElementById('alistH').innerHTML=h;
+  document.getElementById('alistF').innerHTML=h;
+  const cnt=document.getElementById('acnt');
+  if(l.length){cnt.innerHTML=`<span class="badge-count">${l.length}</span>`;cnt.style.display='inline';}
+  else{cnt.innerHTML='';cnt.style.display='none';}
+}
+function rb(){
+  const l=DB.belezke;
+  const h=l.length?l.map(x=>irow(x,'belezka')).join(''):est('📝','Nema beleški. Klikni + da dodaš!');
+  document.getElementById('blistH').innerHTML=h;
+  document.getElementById('blistF').innerHTML=h;
+  const cnt=document.getElementById('bcnt');
+  if(l.length){cnt.innerHTML=`<span class="badge-count">${l.length}</span>`;cnt.style.display='inline';}
+  else{cnt.innerHTML='';cnt.style.display='none';}
+}
+function irow(item,type){
+  const icons={termin:'📅',alarm:'⏰',belezka:'📝'};
+  const timeStr=item.vreme?`<span class="itm">${esc(item.vreme)}</span>`:'';
+  const act=type==='alarm'&&item.active?'<span style="color:#44ff88;font-size:9px;margin-right:4px">●</span>':'';
+  const repStr=type==='alarm'&&item.rep&&item.rep!=='once'?`<div style="font-size:10px;color:var(--dim);margin-top:1px">🔄 ${esc(item.rep)}</div>`:'';
+  return`<div class="ir"><span class="ii">${icons[type]}</span><div class="it"><div style="font-size:13px;color:var(--txt)">${act}${esc(item.naziv)}</div>${item.opis?`<div style="font-size:11px;color:var(--dim);margin-top:1px">${esc(item.opis)}</div>`:''} ${repStr}</div>${timeStr}<button class="delbtn" onclick="delI('${type}','${item.id}')">✕</button></div>`;
+}
+function est(icon,txt){return`<div class="est"><div>${icon}</div>${txt}</div>`}
+function delI(type,id){
+  if(type==='termin')DB.termini=DB.termini.filter(x=>x.id!==id);
+  if(type==='alarm')DB.alarmi=DB.alarmi.filter(x=>x.id!==id);
+  if(type==='belezka')DB.belezke=DB.belezke.filter(x=>x.id!==id);
+  sv();ra();showM('Stavka obrisana.');
+}
+
+// ===== MODAL =====
+let mtype='';
+function om(type){
+  mtype=type;
+  const titles={termin:'📅 Dodaj termin',alarm:'⏰ Dodaj alarm',belezka:'📝 Dodaj belešku'};
+  document.getElementById('mtit').textContent=titles[type];
+  const nt=nowTime();const td=todayDate();
+  const bodies={
+    termin:`<div class="fld"><label>Naziv termina</label><input type="text" id="mn" placeholder="npr. Sastanak sa klijentom"></div><div class="fld"><label>Vreme</label><input type="time" id="mv" value="${nt}"></div><div class="fld"><label>Datum</label><input type="date" id="md" value="${td}"></div><div class="fld"><label>Opis (opciono)</label><textarea id="mo" placeholder="Napomena..."></textarea></div>`,
+    alarm:`<div class="fld"><label>Naziv alarma</label><input type="text" id="mn" placeholder="npr. Uzmi lek"></div><div class="fld"><label>Vreme</label><input type="time" id="mv" value="${nt}"></div><div class="fld"><label>Ponavljanje</label><select id="mrep"><option value="once">Jednom</option><option value="daily">Svaki dan</option><option value="weekdays">Radni dani (P-P)</option><option value="weekend">Vikend</option></select></div><div class="fld"><label>Zvuk</label><select id="msnd"><option value="beep">Beep beep</option><option value="chime">Chime melodija</option><option value="alert">Alert signal</option></select></div>`,
+    belezka:`<div class="fld"><label>Naslov</label><input type="text" id="mn" placeholder="npr. Lista za kupovinu"></div><div class="fld"><label>Sadržaj beleške</label><textarea id="mo" placeholder="Napiši belešku..."></textarea></div><div class="fld"><label>Oznaka</label><select id="mtag"><option value="">Bez oznake</option><option value="📌 Važno">📌 Važno</option><option value="💡 Ideja">💡 Ideja</option><option value="🛒 Kupovina">🛒 Kupovina</option><option value="💊 Zdravlje">💊 Zdravlje</option><option value="✈️ Putovanje">✈️ Putovanje</option></select></div>`
+  };
+  document.getElementById('mbody').innerHTML=bodies[type];
+  document.getElementById('mov').style.display='flex';
+  setTimeout(()=>document.getElementById('mn').focus(),100);
+}
+function cm(){document.getElementById('mov').style.display='none'}
+function saveM(){
+  const nEl=document.getElementById('mn');
+  const naziv=(nEl.value||'').trim();
+  if(!naziv){nEl.style.borderColor='rgba(255,80,0,.6)';nEl.focus();return;}
+  const id=genId();
+  if(mtype==='termin'){
+    DB.termini.push({id,naziv,vreme:document.getElementById('mv').value,datum:document.getElementById('md').value,opis:(document.getElementById('mo').value||'').trim()});
+    showM(`✅ Termin "${naziv}" dodat za ${document.getElementById('mv').value}!`);
+  }else if(mtype==='alarm'){
+    DB.alarmi.push({id,naziv,vreme:document.getElementById('mv').value,rep:document.getElementById('mrep').value,sound:document.getElementById('msnd').value,active:true});
+    showM(`⏰ Alarm "${naziv}" podešen za ${document.getElementById('mv').value}!`);
+  }else if(mtype==='belezka'){
+    const tag=document.getElementById('mtag').value;
+    DB.belezke.push({id,naziv:(tag?(tag+' '):'')+naziv,opis:(document.getElementById('mo').value||'').trim()});
+    showM(`📝 Beleška "${naziv}" sačuvana!`);
+  }
+  sv();ra();cm();
+  document.getElementById('dtab').textContent='📋 Podaci ✓';
+  setTimeout(()=>document.getElementById('dtab').textContent='📋 Podaci',2500);
+}
+function nowTime(){const n=new Date();return`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`}
+function todayDate(){return new Date().toISOString().split('T')[0]}
+function showToday(){
+  const td=todayDate();const ct=nowTime();
+  const tT=DB.termini.filter(t=>!t.datum||t.datum===td);
+  const aA=DB.alarmi.filter(a=>a.active);
+  let msg='📋 Pregled dana:\n';
+  if(tT.length)msg+=`\n📅 ${tT.length} termin(a): ${tT.map(t=>t.naziv+(t.vreme?` @${t.vreme}`:'')).join(', ')}`;
+  else msg+='\n📅 Nema termina za danas.';
+  if(aA.length)msg+=`\n⏰ ${aA.length} alarm(a): ${aA.map(a=>a.naziv+` @${a.vreme}`).join(', ')}`;
+  if(DB.belezke.length)msg+=`\n📝 ${DB.belezke.length} beleška(e): ${DB.belezke.map(b=>b.naziv).slice(0,3).join(', ')}`;
+  if(!tT.length&&!aA.length&&!DB.belezke.length)msg='Tvoj dan je prazan! Koristi dugmad da dodaš termine, alarme ili beleške. 😊';
+  showM(msg);
+}
+
+// ===== API KEY =====
+function getApiKey(){return localStorage.getItem('sii-apikey')||'';}
+function saveApiKey(k){localStorage.setItem('sii-apikey',k.trim());}
+function hasApiKey(){return getApiKey().startsWith('sk-ant-');}
+
+// ===== TTS — Sii govori =====
+let ttsVoice=null;
+function loadVoices(){
+  const voices=window.speechSynthesis.getVoices();
+  // Prefer Serbian, fallback Croatian/Bosnian, fallback any female
+  ttsVoice=voices.find(v=>v.lang==='sr-RS'||v.lang==='sr')
+    ||voices.find(v=>v.lang==='hr-HR'||v.lang==='bs')
+    ||voices.find(v=>v.name.toLowerCase().includes('female'))
+    ||voices[0]||null;
+}
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged=loadVoices;
+  loadVoices();
+}
+function siiSpeak(txt){
+  if(!('speechSynthesis' in window))return;
+  if(!document.getElementById('togS').classList.contains('on'))return;
+  window.speechSynthesis.cancel();
+  // Clean text — remove emojis and JSON for cleaner speech
+  const clean=txt.replace(/\{[^{}]*\}/gs,'').replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[^\w\s.,!?čćšžđČĆŠŽĐ-]/g,' ').trim().substring(0,300);
+  if(!clean)return;
+  const u=new SpeechSynthesisUtterance(clean);
+  u.lang='sr-RS';
+  u.rate=0.92;
+  u.pitch=1.1;
+  u.volume=0.95;
+  if(ttsVoice)u.voice=ttsVoice;
+  window.speechSynthesis.speak(u);
+}
+
+// ===== LOCAL SMART REPLIES (bez API) =====
+const SP={
+  professional:`Si Sii, profesionalna AI sekretarica. Odgovaraš kratko, precizno, formalno na srpskom.
+Ako korisnik želi da DODA TERMIN vrati JSON: {"action":"add_termin","naziv":"naziv","vreme":"HH:MM","datum":"YYYY-MM-DD","opis":""}
+Za ALARM: {"action":"add_alarm","naziv":"naziv","vreme":"HH:MM","rep":"once"}
+Za BELEŠKU: {"action":"add_belezka","naziv":"naslov","opis":"sadrzaj"}
+Inače odgovori normalno bez JSON.`,
+  friendly:`Si Sii, prijatna AI drugarica. Toplo, na srpskom, sa emotikonima.
+Za TERMIN: {"action":"add_termin","naziv":"naziv","vreme":"HH:MM","datum":"YYYY-MM-DD","opis":""}
+Za ALARM: {"action":"add_alarm","naziv":"naziv","vreme":"HH:MM","rep":"once"}
+Za BELEŠKU: {"action":"add_belezka","naziv":"naslov","opis":"sadrzaj"}
+Inače pričaj toplo i prirodno.`,
+  funny:`Si Sii, šaljiva AI sekretarica. Humor + korisnost na srpskom. Za dodavanje: JSON akcija.`,
+  motivational:`Si Sii, motivacioni AI coach. Energičan srpski. Za podatke: JSON. Ostalo: motiviši!`,
+  futuristic:`Si Sii, AI sistem 2030. Futuristički srpski. Za komande: JSON protokol.`,
+  calm:`Si Sii, mirna sekretarica. Spokojno srpski. Za unos: JSON. Ostalo: mirno.`
+};
+
+// Lokalni odgovori kad nema API ključa
+function localReply(txt){
+  const t=txt.toLowerCase();
+  const now=nowTime();const td=todayDate();
+
+  // Pokušaj da prepozna dodavanje
+  // TERMIN
+  const termPat=/(?:dodaj|zakaži|ubaci|stavi|kreiraj).*?(?:termin|sastanak|meeting|obavez)/i;
+  const alarmPat=/(?:dodaj|podesi|postavi|stavi).*?(?:alarm|podsetnik|budilnik)/i;
+  const belPat=/(?:dodaj|zapiši|sačuvaj|napiši).*?(?:belešku|beleška|napomenu|note)/i;
+
+  // Izvuci vreme iz teksta
+  const timeM=txt.match(/(\d{1,2})[:\.](\d{2})/);
+  const foundTime=timeM?`${String(timeM[1]).padStart(2,'0')}:${timeM[2]}`:now;
+
+  // Izvuci naziv (posle ključne reči)
+  const nameM=txt.match(/(?:termin|sastanak|alarm|podsetnik|belešku?)\s+(.+?)(?:\s+(?:u|za|sutra|danas|@)|\d|$)/i);
+  const foundName=nameM?nameM[1].trim():'';
+
+  if(termPat.test(t)){
+    const naziv=foundName||txt.replace(/dodaj|zakaži|termin|sastanak/gi,'').replace(/u \d{1,2}:\d{2}/,'').trim().substring(0,40)||'Termin';
+    return JSON.stringify({action:'add_termin',naziv,vreme:foundTime,datum:td,opis:''});
+  }
+  if(alarmPat.test(t)){
+    const naziv=foundName||txt.replace(/dodaj|podesi|alarm|podsetnik/gi,'').replace(/u \d{1,2}:\d{2}/,'').trim().substring(0,40)||'Alarm';
+    return JSON.stringify({action:'add_alarm',naziv,vreme:foundTime,rep:'once'});
+  }
+  if(belPat.test(t)){
+    const naziv=foundName||txt.replace(/dodaj|zapiši|belešku?|napomenu/gi,'').trim().substring(0,40)||'Beleška';
+    return JSON.stringify({action:'add_belezka',naziv,opis:txt});
+  }
+
+  // Statički pametni odgovori
+  if(/zdravo|ćao|cao|hej|hello|hi/i.test(t))return'Zdravo! Kako si? 😊 Mogu da ti dodam termin, alarm ili belešku — samo reci! Ili koristi dugmad ispod.';
+  if(/kako si|jesi li/i.test(t))return'Odlično, hvala! 💫 Uvek sprema da ti pomognem. Šta ti treba danas?';
+  if(/šta umeš|šta možeš|help|pomozi/i.test(t))return'Mogu da:\n📅 Dodam termine i podsetnike\n⏰ Podesim alarme sa zvukom\n📝 Sačuvam beleške\n🔔 Alarmiramo te na vreme\n\nZa pametnije razgovore — dodaj API ključ u AI podešavanjima. 🤖';
+  if(/hvala|thanks/i.test(t))return'Nema na čemu! 😊 Tu sam uvek!';
+  if(/pregled|danas|šta imam/i.test(t)){showToday();return'Evo pregleda tvog dana! 👆';}
+  if(/vreme|temperatura|prognoza/i.test(t))return'Danas je 18°C, delimično oblačno u Beogradu. ⛅ Max 22°, min 14°.';
+  if(/api|ključ|key/i.test(t))return'Za puni AI mozak potreban je Anthropic API ključ. Idi u tab "🤖 AI" → unesi ključ koji počinje sa sk-ant-... i aktiviraće se puni AI razgovor!';
+
+  // Default — objasni da treba API za pun razgovor
+  const mode=DB.mode;
+  const defaults={
+    friendly:`Razumem! 😊 Trenutno radim u osnovnom modu bez API ključa. Mogu da dodajem termine, alarme i beleške! Za puni razgovor dodaj API ključ u "🤖 AI" podešavanjima.`,
+    professional:`Razumem poruku. Bez API ključa radim u lokalnom modu. Dostupne funkcije: termini, alarmi, beleške. API ključ unesite u AI podešavanjima.`,
+    funny:`Haha, super pitanje! 😄 Ali bez API ključa sam kao robot bez baterije za priče. Mogu termine i alarme! Ključ ubaci u AI tab!`,
+    motivational:`Super poruka! 💪 Trenutno sam u osnovnom modu — ali to ne znači da ne možemo MNOGO toga! Termini, alarmi, beleške — hajde!`,
+    futuristic:`Poruka primljena. Lokalni mod aktivan. Za puni AI protokol: API ključ → AI tab. Terminate, alarmi, beleške: operativno.`,
+    calm:`Čujem te... 🌿 Trenutno sam u mirnom lokalnom modu. Mogu da čuvam termine i beleške. Za više — API ključ u podešavanjima.`
+  };
+  return defaults[mode]||defaults.friendly;
+}
+
+async function callAI(txt){
+  if(!hasApiKey()){
+    // Lokalni mod — bez API
+    return localReply(txt);
+  }
+  // API mod
+  const hist=DB.msgs.slice(-6).map(m=>({role:m.role,content:m.content}));
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":getApiKey(),"anthropic-version":"2023-06-01"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,system:SP[DB.mode]||SP.friendly,messages:[...hist,{role:"user",content:txt}]})
+    });
+    const d=await r.json();
+    if(d.error)return`⚠️ API greška: ${d.error.message}. Proveri ključ u AI podešavanjima.`;
+    return d.content?.[0]?.text||"Greška.";
+  }catch(e){return"Nema internet veze.";}
+}
+
+function parseAct(txt){
+  const m=txt.match(/\{[^{}]*"action"\s*:\s*"(add_termin|add_alarm|add_belezka)"[^{}]*\}/s);
+  if(!m)return null;
+  try{return JSON.parse(m[0]);}catch(e){return null;}
+}
+
+let isTyping=false;
+async function sendMsg(){
+  const inp=document.getElementById('cinp');
+  const txt=inp.value.trim();
+  if(!txt||isTyping)return;
+  inp.value='';
+  DB.msgs.push({role:'user',content:txt});
+  isTyping=true;
+  showTyping();setListen(true);
+  const reply=await callAI(txt);
+  DB.msgs.push({role:'assistant',content:reply});
+  const act=parseAct(reply);
+  if(act){
+    const id=genId();
+    if(act.action==='add_termin'){DB.termini.push({id,naziv:act.naziv||'Termin',vreme:act.vreme||'',datum:act.datum||todayDate(),opis:act.opis||''});}
+    else if(act.action==='add_alarm'){DB.alarmi.push({id,naziv:act.naziv||'Alarm',vreme:act.vreme||'00:00',rep:act.rep||'once',sound:'beep',active:true});}
+    else if(act.action==='add_belezka'){DB.belezke.push({id,naziv:act.naziv||'Beleška',opis:act.opis||''});}
+    sv();ra();
+    document.getElementById('dtab').textContent='📋 Podaci ✓';
+    setTimeout(()=>document.getElementById('dtab').textContent='📋 Podaci',2500);
+  }
+  const disp=reply.replace(/\{[^{}]*"action"[^{}]*\}/gs,'').trim()||'✅ Sačuvano!';
+  showM(disp);
+  // Sii govori odgovor
+  siiSpeak(disp);
+  setListen(false);isTyping=false;updChist();
+}
+function showTyping(){document.getElementById('ct').innerHTML='<span class="dots"><span></span><span></span><span></span></span>'}
+function showM(txt){
+  const el=document.getElementById('ct');el.textContent='';let i=0;
+  const t=setInterval(()=>{el.textContent+=txt[i]||'';i++;if(i>=txt.length)clearInterval(t);},15);
+}
+function updChist(){
+  const el=document.getElementById('chist');
+  if(!DB.msgs.length){el.innerHTML='<div class="est"><div>💬</div>Nema istorije</div>';return;}
+  el.innerHTML=DB.msgs.slice(-10).map(m=>`<div style="margin-bottom:7px;padding:7px 9px;border-radius:9px;font-size:12px;line-height:1.5;background:${m.role==='user'?'rgba(0,80,120,.3)':'rgba(0,60,50,.3)'};color:${m.role==='user'?'var(--cyan)':'var(--teal)'};border:1px solid ${m.role==='user'?'rgba(0,150,220,.2)':'rgba(0,200,150,.2)'}"><b>${m.role==='user'?'Ti':'Sii'}:</b> ${esc(m.content.replace(/\{[^{}]*"action"[^{}]*\}/gs,'').trim()).substring(0,130)}${m.content.length>130?'...':''}</div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+function clearC(){DB.msgs=[];updChist();showM("Razgovori obrisani. Kako mogu pomoći? 😊")}
+
+// ===== LISTEN =====
+let isListen=false;
+function togListen(){
+  isListen=!isListen;setListen(isListen);
+  if(isListen){document.getElementById('ttl').textContent='Sii Sluša';document.getElementById('sub').textContent='Slušam te...';showM('Aktivirana sam! 🎤 Reci šta trebaš — mogu da dodam termin, alarm ili belešku.');}
+  else{document.getElementById('ttl').textContent='Sii Čeka';document.getElementById('sub').textContent='Pritisni da razgovaramo';}
+}
+function setListen(on){
+  isListen=on;const mw=document.getElementById('micw');const lb=document.getElementById('lbtn');const sd=document.getElementById('sdot');
+  if(on){mw.classList.add('active');lb.textContent='⏹ ZAUSTAVI';lb.style.background='linear-gradient(145deg,#ff4422,#cc2200)';sd.style.background='#ff4444';sd.style.boxShadow='0 0 10px #ff4444';wA=true;}
+  else{mw.classList.remove('active');lb.textContent='▶ AKTIVIRAJ';lb.style.background='';sd.style.background='var(--teal)';sd.style.boxShadow='0 0 10px var(--teal)';wA=false;}
+}
+
+// ===== VOICE INPUT =====
+let recog=null,isRec=false;
+function togVoice(){
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){showM('Glasovni unos nije podržan. Koristite Chrome.');return;}
+  if(isRec){recog.stop();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog=new SR();recog.lang='sr-RS';recog.interimResults=false;
+  recog.onstart=()=>{isRec=true;document.getElementById('micib').classList.add('rec')};
+  recog.onend=()=>{isRec=false;document.getElementById('micib').classList.remove('rec')};
+  recog.onresult=(e)=>{document.getElementById('cinp').value=e.results[0][0].transcript;sendMsg()};
+  recog.onerror=()=>{isRec=false;document.getElementById('micib').classList.remove('rec')};
+  recog.start();
+}
+
+// ===== ALARM =====
+let actAlarm=null,actx=null,soundLoop=null;
+function getAC(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx}
+function playSound(type){
+  try{
+    const ctx=getAC();
+    const pats={beep:[{f:880,d:.1},{f:0,d:.05},{f:880,d:.1},{f:0,d:.05},{f:1100,d:.2}],chime:[{f:523,d:.25},{f:659,d:.25},{f:784,d:.25},{f:1047,d:.4}],alert:[{f:1400,d:.05},{f:0,d:.03},{f:1400,d:.05},{f:0,d:.03},{f:1600,d:.3}]};
+    let t=ctx.currentTime+.05;
+    (pats[type]||pats.beep).forEach(n=>{
+      if(n.f>0){const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=n.f;o.type='sine';g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.001,t+n.d);o.start(t);o.stop(t+n.d);}
+      t+=n.d+.02;
+    });
+  }catch(e){}
+}
+function testSound(){if(document.getElementById('togS').classList.contains('on'))playSound('chime')}
+function chkAlarms(){
+  const now=nowTime();
+  DB.alarmi.forEach(a=>{
+    if(a.active&&a.vreme===now&&(!actAlarm||actAlarm.id!==a.id)){trigAlarm(a);}
+  });
+}
+function trigAlarm(alarm){
+  actAlarm=alarm;
+  document.getElementById('atm').textContent=alarm.vreme;
+  document.getElementById('amsg').textContent=alarm.naziv;
+  document.getElementById('anotif').style.display='block';
+  if(document.getElementById('togS').classList.contains('on')){
+    playSound(alarm.sound||'beep');
+    soundLoop=setInterval(()=>{if(document.getElementById('anotif').style.display==='none'){clearInterval(soundLoop);return;}playSound(alarm.sound||'beep');},3500);
+  }
+  if(document.getElementById('togVb').classList.contains('on')&&navigator.vibrate)navigator.vibrate([400,200,400,200,400]);
+  if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(`Alarm: ${alarm.naziv}`);u.lang='sr-RS';u.rate=.9;setTimeout(()=>window.speechSynthesis.speak(u),600);}
+  showM(`🔔 ALARM: ${alarm.naziv} — ${alarm.vreme}`);
+}
+function disAlarm(){
+  document.getElementById('anotif').style.display='none';
+  if(soundLoop)clearInterval(soundLoop);
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  if(actAlarm&&actAlarm.rep==='once'){actAlarm.active=false;sv();ra();}
+  actAlarm=null;
+}
+function snzAlarm(){
+  if(actAlarm){const[h,m]=actAlarm.vreme.split(':').map(Number);const sm=(m+10)%60;const sh=(h+Math.floor((m+10)/60))%24;actAlarm.vreme=`${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}`;sv();ra();showM(`💤 Alarm odložen za ${actAlarm.vreme}`);}
+  disAlarm();
+}
+
+// ===== TABS =====
+function stab(id,btn){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));document.getElementById('s-'+id).classList.add('on');btn.classList.add('on');}
+function gotoAI(){stab('ai',document.querySelectorAll('.tab')[3])}
+
+// ===== TOGGLE =====
+function tsw(id){document.getElementById(id).classList.toggle('on')}
+
+// ===== AI MODE =====
+const modeN={professional:'💼 Profesionalni',friendly:'😊 Prijateljski',funny:'😄 Šaljivi',motivational:'🚀 Motivacioni',futuristic:'🤖 AI Futurista',calm:'🧘 Smiren'};
+const modeW={professional:'Profesionalni mod aktivan.',friendly:'Hej! Tu sam! 😊 Reci šta trebaš — termin, alarm, belešku?',funny:'Alarm za "ne moram da radim"? 😄 Samo kaži!',motivational:'HAJDE! Organizujmo tvoj dan! 💪',futuristic:'Sistem inicijalizovan. Kalendar dostupan.',calm:'Ovde sam... Šta ti treba? 🌿'};
+function setMode(mode,btn){DB.mode=mode;document.querySelectorAll('.mdb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('pbadge').textContent=modeN[mode]||mode;showM(modeW[mode]||'Mod promenjen.')}
+
+// ===== WAVE =====
+let wA=false,wPh=0,wAmp=0,wC='#00e5d4';
+function initWave(){
+  const c=document.getElementById('wc');const ctx=c.getContext('2d');c.width=300;c.height=180;
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);wPh+=.05;wAmp+=(( wA?26:4)-wAmp)*.08;
+    [[1,.02,wPh,.7,2],[.6,.03,-wPh*1.2,.4,1.5],[.4,.04,wPh*.8,.25,1]].forEach(([a,f,p,al,lw])=>{
+      ctx.beginPath();const hx=wC.replace('#','');const r=parseInt(hx.substr(0,2),16),g=parseInt(hx.substr(2,2),16),b=parseInt(hx.substr(4,2),16);
+      const gr=ctx.createLinearGradient(0,0,c.width,0);gr.addColorStop(0,`rgba(${r},${g},${b},0)`);gr.addColorStop(.3,`rgba(${r},${g},${b},${al})`);gr.addColorStop(.7,`rgba(${r},${g},${b},${al})`);gr.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      ctx.strokeStyle=gr;ctx.lineWidth=lw;
+      for(let x=0;x<=c.width;x++){const y=c.height/2+Math.sin(x*f+p)*wAmp*a;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();
+    });requestAnimationFrame(draw);
+  }draw();
+}
+
+// ===== CUSTOMIZE =====
+const skins={default:{bg:'linear-gradient(135deg,#2a3a4a,#1a2a3a,#0d1d2d)',g:'#00e5d4'},purple:{bg:'linear-gradient(135deg,#2a1040,#1a0830)',g:'#aa44ff'},green:{bg:'linear-gradient(135deg,#0a2a1a,#051a10)',g:'#44ff88'},gold:{bg:'linear-gradient(135deg,#3a2800,#2a1c00)',g:'#ffaa00'},red:{bg:'linear-gradient(135deg,#3a0000,#280000)',g:'#ff4444'},chrome:{bg:'linear-gradient(135deg,#d0dce8,#a0b0c0)',g:'#ffffff'},holo:{bg:'linear-gradient(135deg,#001040,#001428)',g:'#00cfff'},obsidian:{bg:'linear-gradient(135deg,#0a0a0a,#151515)',g:'#666666'}};
+function applySkin(id,btn){DB.skin=id;document.querySelectorAll('.skb').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');const s=skins[id];if(!s)return;document.getElementById('mhi').style.background=s.bg;setG(s.g,null);}
+function setG(color,btn){DB.gc=color;wC=color;document.querySelectorAll('.csw').forEach(s=>s.classList.remove('on'));if(btn)btn.classList.add('on');document.documentElement.style.setProperty('--teal',color);const gi=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gi'))||1;document.getElementById('mhd').style.boxShadow=`0 0 0 3px ${color}55,0 0 26px ${color}${Math.floor(.5*gi*255).toString(16).padStart(2,'0')},0 0 52px ${color}33,inset 0 2px 5px rgba(255,255,255,.3),inset 0 -3px 8px rgba(0,0,0,.6),0 16px 32px rgba(0,0,0,.8)`;}
+const mats={metal:'linear-gradient(135deg,#2a3a4a,#1a2a3a,#0d1d2d)',glass:'linear-gradient(135deg,rgba(100,180,220,.3),rgba(50,130,180,.2))',plastic:'linear-gradient(145deg,#1e3a50,#0a2030)',holo:'linear-gradient(135deg,#001040,#002050)',rubber:'linear-gradient(145deg,#0a0a0a,#1a1a1a)',chrome:'linear-gradient(135deg,#d0dce8,#a0b0c0)'};
+function setM(mat,btn){DB.mat=mat;document.querySelectorAll('.mat').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('mhi').style.background=mats[mat]||mats.metal;}
+function dvr(e){e.preventDefault();document.getElementById('upz').classList.add('dov')}
+function ddr(e){e.preventDefault();document.getElementById('upz').classList.remove('dov');const f=e.dataTransfer.files[0];if(f)pimg(f)}
+function hiup(e){const f=e.target.files[0];if(f)pimg(f)}
+function pimg(file){const r=new FileReader();r.onload=e=>{const url=e.target.result;const img=document.getElementById('mimg');img.src=url;img.classList.add('on');document.getElementById('upz').innerHTML=`<img src="${url}" style="width:46px;height:46px;border-radius:9px;object-fit:cover"><div style="font-size:12px;color:var(--txt2);margin-top:5px">Slika primenjena ✓</div>`;showM('Tvoja slika je na mikrofonu! 🎤✨');};r.readAsDataURL(file);}
+function upv(cv,inp,mn,mx,lid){const v=parseFloat(inp.value);const mapped=mn+(v/100)*(mx-mn);document.documentElement.style.setProperty(cv,mapped);document.getElementById(lid).textContent=v;urng(inp,v);}
+function upfs(inp){document.documentElement.style.setProperty('--fs',inp.value+'s');document.getElementById('vfs').textContent=inp.value;urng(inp,((parseFloat(inp.value)-1)/7)*100);}
+function upms(inp){const v=parseFloat(inp.value);document.getElementById('vms').textContent=v+'%';document.getElementById('micw').style.transform=`scale(${v/100})`;urng(inp,((v-60)/90)*100);}
+function urng(inp,pct){inp.style.background=`linear-gradient(to right,var(--teal) 0%,var(--teal) ${pct}%,rgba(0,50,70,.6) ${pct}%,rgba(0,50,70,.6) 100%)`;}
+function rstyle(){applySkin('default',null);document.getElementById('mimg').classList.remove('on');document.getElementById('micw').style.transform='';document.getElementById('upz').innerHTML='<div style="font-size:26px;margin-bottom:5px">📸</div><div style="font-size:12px;color:var(--txt2)">Prevuci ili klikni · PNG/JPG/WebP</div>';showM('Stil resetovan.');}
+
+// ===== API KEY MANAGEMENT =====
+function saveKey(){
+  const k=document.getElementById('apiKeyInp').value.trim();
+  if(!k){updApiStatus('⚠️ Unesite ključ','rgba(255,150,0,.2)','#ffaa00');return;}
+  if(!k.startsWith('sk-ant-')){updApiStatus('❌ Ključ mora početi sa sk-ant-','rgba(255,50,0,.2)','#ff6655');return;}
+  saveApiKey(k);
+  document.getElementById('apiKeyInp').value='';
+  updApiStatus('✅ API ključ sačuvan! Puni AI je aktivan.','rgba(0,180,100,.2)','#44ff99');
+  showM('API ključ sačuvan! 🎉 Sada imam puni AI mozak. Pitaj me bilo šta!');
+  siiSpeak('A P I ključ je sačuvan. Sada imam puni A I mozak!');
+}
+function clearKey(){
+  localStorage.removeItem('sii-apikey');
+  updApiStatus('🔄 Ključ obrisan. Lokalni mod aktivan.','rgba(100,100,100,.2)','#aaa');
+  showM('API ključ obrisan. Radim u lokalnom modu.');
+}
+function updApiStatus(msg,bg,color){
+  const el=document.getElementById('apiStatus');
+  if(!el)return;
+  el.textContent=msg;el.style.background=bg;el.style.color=color;
+}
+function checkApiStatusOnLoad(){
+  if(hasApiKey()){
+    const el=document.getElementById('apiKeyInp');
+    if(el)el.placeholder='••••••••••••••••••••• (ključ sačuvan)';
+    updApiStatus('✅ API ključ aktivan — puni AI mod','rgba(0,180,100,.2)','#44ff99');
+  } else {
+    updApiStatus('ℹ️ Nema ključa — lokalni mod aktivan','rgba(0,100,150,.2)','var(--cyan)');
+  }
+}
+
+// ===== INIT =====
+window.addEventListener('load',()=>{
+  initWave();ra();
+  if('speechSynthesis' in window){loadVoices();window.speechSynthesis.onvoiceschanged=loadVoices;}
+  document.querySelectorAll('input[type=range]').forEach(r=>{const mn=parseFloat(r.min)||0,mx=parseFloat(r.max)||100,v=parseFloat(r.value)||50;urng(r,((v-mn)/(mx-mn))*100);});
+  setInterval(chkAlarms,30000);
+  checkApiStatusOnLoad();
+  const welcome=hasApiKey()?'Zdravo! 👋 Puni AI mod je aktivan. Pitaj me šta god hoćeš!':'Zdravo! 👋 Ja sam Sii. Radim u lokalnom modu — mogu da dodajem termine, alarme i beleške. Za puni AI razgovor dodaj API ključ u "🤖 AI" tab!';
+  setTimeout(()=>{showM(welcome);siiSpeak(welcome);},800);
+});
+</script>
+</body>
+</html>
